@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="VExUS">
+<meta name="theme-color" content="#f5f3f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151213" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>VExUS Score</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="format-detection" content="telephone=no">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: steps column on the left, sticky grade readout on the right; stacks with readout pinned to bottom on phones */
+:root{
+  --bg:#f5f3f2; --surface:#ffffff; --ink:#1d1a1b; --muted:#6b6264; --line:#e3dcdc;
+  --accent:#8e2a2e; --accent-soft:#f6e7e7; --scope:#0d0b0a;
+  --g0:#2f7a55; --g1:#b9881a; --g2:#c8611f; --g3:#a52329;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151213; --surface:#1f1b1c; --ink:#f1ecec; --muted:#a59b9c; --line:#352e30;
+  --accent:#e0787b; --accent-soft:#3a2224; --scope:#000;
+  --g0:#5cc08c; --g1:#e2b444; --g2:#ef8a47; --g3:#f06267; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151213; --surface:#1f1b1c; --ink:#f1ecec; --muted:#a59b9c; --line:#352e30;
+  --accent:#e0787b; --accent-soft:#3a2224; --scope:#000;
+  --g0:#5cc08c; --g1:#e2b444; --g2:#ef8a47; --g3:#f06267; color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button{touch-action:manipulation}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+.wrap{max-width:1180px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-bottom:18px;border-bottom:2px solid var(--ink);margin-bottom:22px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{margin:0;font-size:clamp(26px,4.5vw,38px);font-weight:800;letter-spacing:-.02em;line-height:1.1;text-wrap:balance}
+.sub{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.btn{font:inherit;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible,.opt:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start}
+.steps{display:flex;flex-direction:column;gap:22px;min-width:0}
+section.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;transition:opacity .2s}
+section.step.dim{opacity:.45}
+.step-head{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.num{font-family:var(--f-mono);font-weight:700;font-size:13px;color:#fff;background:var(--accent);border-radius:6px;padding:2px 8px;flex:none}
+:root[data-theme="dark"] .num{color:var(--bg)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .num{color:var(--bg)}}
+h2{margin:0;font-size:18px;font-weight:700}
+.hint{margin:2px 0 14px;color:var(--muted);font-size:13.5px}
+.opts{display:grid;gap:12px}
+.opts.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt{display:flex;flex-direction:column;text-align:left;font:inherit;color:inherit;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:0;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
+.opt:hover{border-color:var(--muted)}
+.opt{width:100%;-webkit-appearance:none;appearance:none}
+.thumb{display:block;position:relative;width:100%;aspect-ratio:var(--ar,1);background:var(--scope);overflow:hidden}
+.thumb svg{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
+.thumb img{position:absolute;top:0;left:0;width:100%;height:100%;max-width:none;object-fit:cover;display:block}
+.opt .lab{padding:9px 11px 11px;display:flex;flex-direction:column;gap:2px}
+.opt .t{font-weight:700;font-size:14px}
+.opt .c{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--sev)}
+.opt[aria-pressed="true"] .lab{background:color-mix(in srgb,var(--sev) 14%,transparent)}
+.opt[aria-pressed="true"] .t{color:var(--sev)}
+.sev-n{--sev:var(--g0)} .sev-m{--sev:var(--g1)} .sev-s{--sev:var(--g3)}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:1px 7px;border-radius:99px;border:1px solid var(--sev);color:var(--sev);align-self:flex-start;margin-bottom:3px}
+.calc{margin-top:14px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;padding:12px;border-radius:10px;background:var(--accent-soft)}
+.calc label{display:flex;flex-direction:column;font-size:12px;font-weight:600;color:var(--muted);gap:4px}
+.calc input{font:inherit;font-family:var(--f-mono);font-size:16px;width:110px;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
+.calc .out{font-family:var(--f-mono);font-size:14px;min-width:0}
+.calc .out b{font-size:20px}
+.formula{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);width:100%}
+/* readout */
+aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.readout{border:2px solid var(--gc,var(--line))}
+.readout .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.gradeline{display:flex;align-items:baseline;gap:12px;margin:6px 0 2px}
+.big{font-family:var(--f-mono);font-weight:700;font-size:64px;line-height:1;color:var(--gc,var(--muted));font-variant-numeric:tabular-nums}
+.gname{font-weight:700;font-size:18px;color:var(--gc,var(--muted));text-wrap:balance}
+.gdesc{margin:8px 0 0;color:var(--muted);font-size:13.5px}
+.meter{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:14px}
+.meter span{height:8px;border-radius:3px;background:var(--line)}
+.meter span.on{background:var(--gc)}
+.summary{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.summary li{display:flex;justify-content:space-between;gap:10px;border-top:1px dashed var(--line);padding-top:6px}
+.summary .v{font-weight:600;text-align:right}
+.summary .v.n{color:var(--g0)} .summary .v.m{color:var(--g1)} .summary .v.s{color:var(--g3)} .summary .v.x{color:var(--muted);font-weight:400}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td:nth-child(2){white-space:nowrap}
+td.g{font-family:var(--f-mono);font-weight:700}
+.notes{font-size:12.5px;color:var(--muted);margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+h3{margin:0 0 10px;font-size:14px}
+@media (max-width:900px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  aside{position:static}
+  .mini{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex!important;align-items:center;gap:12px;
+    background:var(--surface);border-top:2px solid var(--gc,var(--line));
+    padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+}
+.mini{display:none}
+.mini .big{font-size:34px}
+.mini .gname{font-size:15px}
+@media (max-width:600px){
+  body{padding-block:12px 96px}
+  header{margin-bottom:16px;padding-bottom:14px}
+  .sub{font-size:14px}
+  .steps{gap:16px}
+  section.step{padding:14px;border-radius:14px}
+  h2{font-size:16.5px}
+  .hint{font-size:13px;margin-bottom:12px}
+  /* one option per row: image on the left, label on the right — big tap targets */
+  .opts.c2,.opts.c3{grid-template-columns:minmax(0,1fr);gap:10px}
+  .opt{flex-direction:row;align-items:stretch;min-height:100px;border-radius:12px}
+  .thumb{width:46%;flex:0 0 46%;aspect-ratio:auto;height:auto;min-height:100px}
+  .opts[data-key="pv"] .thumb{width:52%;flex-basis:52%}
+  .thumb img{object-fit:contain}
+  .opts[data-key="pv"] .thumb img{object-fit:cover}
+  .opts[data-key="ivc"] .thumb img{object-fit:cover}
+  .opt .lab{flex:1;min-width:0;justify-content:center;padding:10px 12px}
+  .opt .t{font-size:15px}
+  .opt .c{font-size:13px}
+  .opt[aria-pressed="true"]::after{content:"✓";align-self:center;margin-right:12px;font-weight:800;color:var(--sev);font-size:18px}
+  .calc{gap:10px}
+  .calc label{flex:1 1 40%}
+  .calc input{width:100%;font-size:16px;padding:10px 11px}
+  .calc .out{width:100%}
+  .big{font-size:52px}
+  .notes{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>VExUS score</h1>
+  <button class="btn" id="reset" type="button">Làm lại</button>
+</header>
+
+<div class="grid">
+<div class="steps">
+
+<section class="step" id="s-ivc">
+  <div class="step-head"><span class="num">1</span><h2>Đường kính tĩnh mạch chủ dưới (IVC)</h2></div>
+  <p class="hint">Đo cuối thì thở ra, cách chỗ đổ vào nhĩ phải khoảng 2 cm. IVC &lt; 20 mm thì VExUS = 0, không cần đánh giá tiếp.</p>
+  <div class="opts c2" data-key="ivc" style="--ar:245/220">
+    <button type="button" class="opt sev-n" data-val="0" aria-pressed="false"><span class="thumb"><img alt="IVC bình thường, đường kính dưới 20 mm" src="data:image/jpeg;base64,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"></span><span class="lab"><span class="pill">Bình thường</span><span class="t">IVC &lt; 20 mm</span></span></button>
+    <button type="button" class="opt sev-s" data-val="1" aria-pressed="false"><span class="thumb"><img alt="IVC giãn, đường kính từ 20 mm trở lên" src="data:image/jpeg;base64,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"></span><span class="lab"><span class="pill">Sung huyết</span><span class="t">IVC ≥ 20 mm</span></span></button>
+  </div>
+</section>
+
+<section class="step" id="s-hv">
+  <div class="step-head"><span class="num">2</span><h2>Doppler tĩnh mạch gan</h2></div>
+  <p class="hint">So sánh sóng S (tâm thu) và D (tâm trương), đối chiếu với ECG.</p>
+  <div class="opts c3" data-key="hv" style="--ar:300/200">
+    <button type="button" class="opt sev-n" data-val="0" aria-pressed="false"><span class="thumb" data-svg="hv0"></span><span class="lab"><span class="pill">Bình thường</span><span class="t">S &gt; D</span></span></button>
+    <button type="button" class="opt sev-m" data-val="1" aria-pressed="false"><span class="thumb" data-svg="hv1"></span><span class="lab"><span class="pill">Nhẹ</span><span class="t">S &lt; D</span></span></button>
+    <button type="button" class="opt sev-s" data-val="2" aria-pressed="false"><span class="thumb" data-svg="hv2"></span><span class="lab"><span class="pill">Nặng</span><span class="t">S đảo chiều</span></span></button>
+  </div>
+</section>
+
+<section class="step" id="s-pv">
+  <div class="step-head"><span class="num">3</span><h2>Doppler tĩnh mạch cửa</h2></div>
+  <p class="hint">Đánh giá chỉ số dao động (pulsatility fraction) của dòng chảy tĩnh mạch cửa.</p>
+  <div class="opts c3" data-key="pv" style="--ar:300/132">
+    <button type="button" class="opt sev-n" data-val="0" aria-pressed="false"><span class="thumb" data-svg="pv0"></span><span class="lab"><span class="pill">Bình thường</span><span class="t">Dao động</span><span class="c">&lt; 30%</span></span></button>
+    <button type="button" class="opt sev-m" data-val="1" aria-pressed="false"><span class="thumb" data-svg="pv1"></span><span class="lab"><span class="pill">Nhẹ</span><span class="t">Dao động</span><span class="c">30–49%</span></span></button>
+    <button type="button" class="opt sev-s" data-val="2" aria-pressed="false"><span class="thumb" data-svg="pv2"></span><span class="lab"><span class="pill">Nặng</span><span class="t">Dao động</span><span class="c">≥ 50%</span></span></button>
+  </div>
+  <div class="calc">
+    <label for="vmax">Vmax (cm/s)<input id="vmax" type="number" inputmode="decimal" min="0" step="0.1" placeholder="vd 22"></label>
+    <label for="vmin">Vmin (cm/s)<input id="vmin" type="number" inputmode="decimal" step="0.1" placeholder="vd 9"></label>
+    <span class="out" id="pfout">Nhập để tự tính</span>
+    <span class="formula">Chỉ số dao động = (Vmax − Vmin) / Vmax × 100%</span>
+  </div>
+</section>
+
+<section class="step" id="s-rv">
+  <div class="step-head"><span class="num">4</span><h2>Doppler tĩnh mạch thận</h2></div>
+  <p class="hint">Dòng tĩnh mạch nằm dưới đường nền, phổ động mạch thận ở trên.</p>
+  <div class="opts c3" data-key="rv" style="--ar:300/200">
+    <button type="button" class="opt sev-n" data-val="0" aria-pressed="false"><span class="thumb" data-svg="rv0"></span><span class="lab"><span class="pill">Bình thường</span><span class="t">Dòng liên tục</span></span></button>
+    <button type="button" class="opt sev-m" data-val="1" aria-pressed="false"><span class="thumb" data-svg="rv1"></span><span class="lab"><span class="pill">Nhẹ</span><span class="t">Dòng 2 pha</span><span class="c">S và D tách rời</span></span></button>
+    <button type="button" class="opt sev-s" data-val="2" aria-pressed="false"><span class="thumb" data-svg="rv2"></span><span class="lab"><span class="pill">Nặng</span><span class="t">Dòng 1 pha</span><span class="c">chỉ còn D</span></span></button>
+  </div>
+</section>
+
+</div>
+
+<aside>
+  <div class="card readout" id="readout">
+    <div class="k">Phân độ VExUS</div>
+    <div class="gradeline"><span class="big" id="gbig">–</span><span class="gname" id="gname">Chưa đủ dữ liệu</span></div>
+    <div class="meter" id="meter"><span></span><span></span><span></span><span></span></div>
+    <p class="gdesc" id="gdesc">Bắt đầu bằng đường kính IVC.</p>
+    <ul class="summary" id="summary"></ul>
+  </div>
+  <div class="card">
+    <h3>Tiêu chuẩn phân độ</h3>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Độ</th><th>IVC</th><th>Doppler TM gan, cửa, thận</th></tr></thead>
+      <tbody>
+        <tr><td class="g" style="color:var(--g0)">0</td><td>&lt; 20 mm</td><td>Không cần đánh giá</td></tr>
+        <tr><td class="g" style="color:var(--g1)">1</td><td>≥ 20 mm</td><td>Bình thường hoặc chỉ bất thường nhẹ</td></tr>
+        <tr><td class="g" style="color:var(--g2)">2</td><td>≥ 20 mm</td><td>1 bất thường nặng</td></tr>
+        <tr><td class="g" style="color:var(--g3)">3</td><td>≥ 20 mm</td><td>≥ 2 bất thường nặng</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Lưu ý khi diễn giải</h3>
+    <ul class="notes">
+      <li>Doppler TM gan khó đánh giá khi rung nhĩ, nhịp nhanh hoặc có hở van ba lá nặng.</li>
+      <li>Dòng TM cửa có thể dao động sinh lý ở người trẻ, gầy; xơ gan, tăng áp cửa có thể làm sai lệch kết quả.</li>
+      <li>IVC giãn có thể gặp ở vận động viên, thở máy áp lực dương.</li>
+      <li>Nguồn: Beaubien-Souligny W et al. Ultrasound J 2020;12:16.</li>
+    </ul>
+  </div>
+</aside>
+</div>
+</div>
+
+<div class="mini" id="mini" aria-hidden="true"><span class="big" id="mbig">–</span><span class="gname" id="mname">Chưa đủ dữ liệu</span></div>
+
+<script>
+(function(){
+const E=Math.exp,PI=Math.PI,X0=8,X1=292,f1=n=>n.toFixed(1);
+const g=(t,mu,s)=>[-1,0,1,2].reduce((a,k)=>a+E(-(((t-(mu+k))/s)**2)/2),0);
+const xm=t=>X0+(X1-X0)*t/2;
+function wave(fn,B,SC,N=170){const p=[];for(let i=0;i<=N;i++){const t=2*i/N;p.push(f1(xm(t))+","+f1(B-SC*fn(t)))}
+  return{d:`M${X0},${B} L`+p.join(" L")+` L${X1},${B} Z`,env:"M"+p.join(" L")}}
+function ecg(y0,amp){const e=t=>{const p=t%1;return .12*g(p,.02,.025)-.15*g(p,.105,.008)+g(p,.12,.009)-.25*g(p,.137,.009)+.25*g(p,.36,.05)};
+  const p=[];for(let i=0;i<=260;i++){const t=2*i/260;p.push(f1(xm(t))+","+f1(y0-14*amp*e(t)))}return"M"+p.join(" L")}
+const defs=p=>`<defs><filter id="${p}n" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.1 0.06" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 0.86  0 0 0 0 0.35  2.2 0 0 0 -0.75"/></filter><linearGradient id="${p}g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f3c845"/><stop offset="1" stop-color="#a9790f"/></linearGradient></defs>`;
+const spec=(p,i,w)=>`<clipPath id="${p}c${i}"><path d="${w.d}"/></clipPath><g clip-path="url(#${p}c${i})"><rect width="300" height="300" fill="url(#${p}g)" opacity=".55"/><rect width="300" height="300" filter="url(#${p}n)"/></g><path d="${w.env}" fill="none" stroke="#ffeaa0" stroke-width="1.3" stroke-linejoin="round" opacity=".95"/>`;
+const svg=(h,body,p)=>`<svg viewBox="0 0 300 ${h}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" font-family="Be Vietnam Pro,system-ui,sans-serif"><rect width="300" height="${h}" fill="#050505"/>${defs(p)}${body}</svg>`;
+const base=y=>`<line x1="0" x2="300" y1="${y}" y2="${y}" stroke="#d9d9d9" stroke-width=".8" opacity=".55"/>`;
+const lab=(x,y,s,size=15,c="#fff",a="middle",w=700)=>`<text x="${f1(x)}" y="${f1(y)}" fill="${c}" font-size="${size}" font-weight="${w}" text-anchor="${a}">${s}</text>`;
+function hv(k,p){const B=70,SC=92;
+  const P=[[.22,-1,.12,-.55,.27,.07],[.28,-.42,.16,-.95,.27,.065],[.18,.5,0,-.9,.3,.085]][k];
+  const[A,S,V,D,Sm,Ss]=P,fn=t=>A*g(t,.06,.035)+S*g(t,Sm,Ss)+V*g(t,.47,.035)+D*g(t,.67,.06);
+  let b=base(B)+spec(p,0,wave(fn,B,SC));
+  for(const[mu,n,v]of[[Sm,"S",S],[.67,"D",D]]){const x=xm(mu),y=B-SC*v;b+=v<0?lab(x+15,y+6,n):lab(x+15,y+12,n)}
+  b+=`<path d="${ecg(190,.85)}" fill="none" stroke="#38d39f" stroke-width="1.2"/>`;return svg(200,b,p)}
+function pv(k,p){const B=122,SC=100;let fn,vmax,vmin;
+  if(k==0){fn=t=>.82+.04*Math.sin(2*PI*t*3.1)+.03*Math.sin(2*PI*t*1.3);vmax=.89;vmin=.76}
+  else if(k==1){fn=t=>.9-.34*g(t,.45,.14);vmax=.9;vmin=.56}
+  else{fn=t=>Math.max(0,.86*g(t,.2,.12));vmax=.86;vmin=Infinity;for(let i=0;i<=400;i++)vmin=Math.min(vmin,fn(i/200))}
+  const pf=(vmax-vmin)/vmax*100;let b=base(B)+spec(p,0,wave(fn,B,SC));
+  for(const v of[vmax,vmin]){const y=f1(B-SC*v);b+=`<line x1="0" x2="300" y1="${y}" y2="${y}" stroke="#7fd3ff" stroke-width=".9" stroke-dasharray="4 3" opacity=".9"/>`}
+  b+=`<rect x="6" y="4" width="78" height="17" rx="4" fill="#000" opacity=".65"/>`+lab(12,16.5,`PF ≈ ${pf.toFixed(0)}%`,11.5,"#7fd3ff","start");return svg(132,b,p)}
+function rv(k,p){const B=88,SC=100;
+  const art=t=>.1+.5*g(t,.2,.03)+.16*E(-((((t%1)-.175)%1+1)%1)*1.8);
+  const ven=[t=>-(.38+.05*Math.sin(2*PI*t+1)+.02*Math.sin(2*PI*t*4)),t=>-(.48*g(t,.3,.07)+.5*g(t,.68,.08)+.02),t=>-(.72*g(t,.7,.09)+.015)][k];
+  let b=base(B)+spec(p,0,wave(t=>Math.max(art(t),0),B,SC))+spec(p,1,wave(ven,B,SC));
+  b+=lab(292,14,"ĐM thận",10,"#bbb","end",500)+lab(292,196,"TM thận",10,"#bbb","end",500);
+  if(k==1)for(const[mu,n]of[[.3,"S"],[.68,"D"]])b+=lab(xm(mu),B-SC*ven(mu)+17,n);
+  if(k==2)b+=lab(xm(.7),B-SC*ven(.7)+17,"D");return svg(200,b,p)}
+const F={hv,pv,rv};
+document.querySelectorAll(".thumb[data-svg]").forEach(el=>{const m=el.dataset.svg.match(/^(hv|pv|rv)(\d)$/);el.innerHTML=F[m[1]](+m[2],el.dataset.svg)});
+})();
+
+const state={ivc:null,hv:null,pv:null,rv:null};
+const labels={
+  ivc:["IVC","< 20 mm","≥ 20 mm"],
+  hv:["TM gan","Bình thường","Nhẹ (S<D)","Nặng (S đảo)"],
+  pv:["TM cửa","Bình thường","Nhẹ (30–49%)","Nặng (≥50%)"],
+  rv:["TM thận","Bình thường","Nhẹ (2 pha)","Nặng (1 pha)"]};
+const grades=[
+  {n:"Không sung huyết",d:"IVC dưới 20 mm, không có bằng chứng sung huyết tĩnh mạch hệ thống.",c:"--g0"},
+  {n:"Sung huyết nhẹ",d:"IVC giãn, các dòng chảy Doppler bình thường hoặc chỉ bất thường nhẹ.",c:"--g1"},
+  {n:"Sung huyết trung bình",d:"IVC giãn kèm 1 dòng chảy bất thường nặng.",c:"--g2"},
+  {n:"Sung huyết nặng",d:"IVC giãn kèm từ 2 dòng chảy bất thường nặng trở lên. Trong nghiên cứu gốc, độ 3 liên quan rõ nhất với nguy cơ tổn thương thận cấp.",c:"--g3"}];
+
+function setOpt(key,val){
+  state[key]=val;
+  document.querySelectorAll(`.opts[data-key="${key}"] .opt`).forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.val===val)));
+  render();
+}
+document.querySelectorAll(".opts").forEach(g=>{
+  g.addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;
+    const v=+b.dataset.val; setOpt(g.dataset.key,state[g.dataset.key]===v?null:v);
+    if(g.dataset.key==="pv")document.getElementById("pfout").textContent="Nhập để tự tính";});
+});
+
+const vmax=document.getElementById("vmax"),vmin=document.getElementById("vmin");
+function pf(){
+  const a=parseFloat(vmax.value),b=parseFloat(vmin.value),o=document.getElementById("pfout");
+  if(isNaN(a)||isNaN(b)){o.textContent="Nhập để tự tính";return;}
+  if(a<=0){o.textContent="Vmax phải lớn hơn 0";return;}
+  if(b>a){o.textContent="Vmin không được lớn hơn Vmax";return;}
+  const p=(a-b)/a*100;
+  setOpt("pv",p<30?0:p<50?1:2);
+  o.innerHTML=`<b>${p.toFixed(1)}%</b> → ${p<30?"bình thường":p<50?"nhẹ":"nặng"}`;
+}
+vmax.addEventListener("input",pf);vmin.addEventListener("input",pf);
+
+function compute(){
+  if(state.ivc===null)return null;
+  if(state.ivc===0)return {g:0,complete:true};
+  const rest=["hv","pv","rv"].map(k=>state[k]);
+  const severe=rest.filter(v=>v===2).length;
+  const done=rest.every(v=>v!==null);
+  const g=severe>=2?3:severe===1?2:1;
+  return {g,complete:done||severe>=2,severe,missing:rest.filter(v=>v===null).length};
+}
+function render(){
+  const r=compute(),ro=document.getElementById("readout"),root=document.documentElement;
+  const dim=state.ivc===0;
+  ["s-hv","s-pv","s-rv"].forEach(id=>document.getElementById(id).classList.toggle("dim",dim));
+  let big="–",name="Chưa đủ dữ liệu",desc="Bắt đầu bằng đường kính IVC.",col=null;
+  if(r){
+    const G=grades[r.g];col=`var(${G.c})`;big=r.g;name=G.n;desc=G.d;
+    if(!r.complete){big=r.g===1?"≥1":"≥"+r.g;name="Đang đánh giá";col=`var(${G.c})`;
+      desc=`Còn ${r.missing} dòng chảy chưa chọn. Kết quả tối thiểu hiện tại là độ ${r.g}.`;}
+  }
+  [ro,document.getElementById("mini")].forEach(el=>col?el.style.setProperty("--gc",col):el.style.removeProperty("--gc"));
+  document.getElementById("gbig").textContent=big;document.getElementById("mbig").textContent=big;
+  document.getElementById("gname").textContent=name;document.getElementById("mname").textContent=name;
+  document.getElementById("gdesc").textContent=desc;
+  document.querySelectorAll("#meter span").forEach((s,i)=>s.classList.toggle("on",!!r&&r.complete&&i<=r.g));
+  const cls=["n","m","s"];
+  document.getElementById("summary").innerHTML=Object.keys(labels).map(k=>{
+    const L=labels[k],v=state[k];
+    let txt,c;
+    if(k!=="ivc"&&dim){txt="Không cần";c="x";}
+    else if(v===null){txt="Chưa chọn";c="x";}
+    else{txt=L[v+1];c=k==="ivc"?(v?"s":"n"):cls[v];}
+    return `<li><span>${L[0]}</span><span class="v ${c}">${txt}</span></li>`;}).join("");
+}
+document.getElementById("reset").addEventListener("click",()=>{
+  for(const k in state)state[k]=null;
+  document.querySelectorAll(".opt").forEach(b=>b.setAttribute("aria-pressed","false"));
+  [vmax,vmin].forEach(i=>i.value="");
+  document.getElementById("pfout").textContent="Nhập để tự tính";
+  render();window.scrollTo({top:0});
+});
+render();
+</script>
+
+</body>
+</html>
