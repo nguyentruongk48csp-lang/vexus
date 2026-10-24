@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#f5f3f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#151213" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="apple-touch-icon.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>VExUS Score</title>
@@ -70,7 +71,8 @@ h2{margin:0;font-size:18px;font-weight:700}
 .opt .t{font-weight:700;font-size:14px}
 .opt .c{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
 .opt[aria-pressed="true"]{border-color:var(--sev)}
-.opt[aria-pressed="true"] .lab{background:color-mix(in srgb,var(--sev) 14%,transparent)}
+.opt[aria-pressed="true"] .lab{background:var(--accent-soft)}
+@supports (background:color-mix(in srgb,red 10%,transparent)){.opt[aria-pressed="true"] .lab{background:color-mix(in srgb,var(--sev) 14%,transparent)}}
 .opt[aria-pressed="true"] .t{color:var(--sev)}
 .sev-n{--sev:var(--g0)} .sev-m{--sev:var(--g1)} .sev-s{--sev:var(--g3)}
 .pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:1px 7px;border-radius:99px;border:1px solid var(--sev);color:var(--sev);align-self:flex-start;margin-bottom:3px}
@@ -354,5 +356,6 @@ document.getElementById("reset").addEventListener("click",()=>{
 render();
 </script>
 
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 </body>
 </html>
